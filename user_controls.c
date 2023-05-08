@@ -23,12 +23,7 @@
 #include "shared_variables.h"
 #include "supplement.h"
 
-volatile enum Mode{
-  normal,
-  single_pulse_operation,
-  threshold_adjustment,
-  continuous_tone
-} Mode;
+volatile enum Mode Mode;
 
 volatile bool requested_ping;
 
@@ -40,7 +35,7 @@ void initialize_controls(void) {
     Mode = normal_operation;
   }
   if (cowpi_left_switch_is_in_right_position() && cowpi_right_switch_is_in_left_position()){
-    Mode = sing_pulse_operation;
+    Mode = single_pulse_operation;
   }
   if(cowpi_left_switch_is_in_right_position() && cowpi_right_switch_is_in_right_position()){
     Mode = threshold_adjustment;
@@ -52,7 +47,12 @@ void initialize_controls(void) {
 }
 
 void manage_controls(void) {
-  if(cowpi_left_button_pressed() && Mode == single_pulse_operation){
+  static char top_line[17];
+  if(cowpi_left_button_is_pressed() && Mode == single_pulse_operation){
     requested_ping = true;
+  }
+  if(Mode == threshold_adjustment){
+    sprintf(top_line,"Enter threshold range (cm)");
+    display_string(top_line, TOP_ROW);
   }
 }

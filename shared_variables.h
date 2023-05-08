@@ -32,7 +32,7 @@ extern "C" {
    ARE USED BY MORE THAN ONE .c FILE, PLACE THEM HERE */
 
 extern volatile enum Mode{
-  normal,
+  normal_operation,
   single_pulse_operation,
   threshold_adjustment,
   continuous_tone

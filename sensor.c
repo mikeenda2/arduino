@@ -25,24 +25,36 @@
 volatile bool object_detected;
 volatile long object_distance;
 volatile long object_approach;
+volatile enum Mode;
 
+void handle_pulse_interrupt(){}
+
+cowpi_timer16bit_t *timer1 = (cowpi_timer16bit_t *)(COWPI_IO_BASE + 0x60);
+
+//create enum or state for different controls
 
 void initialize_sensor(void) {
   object_detected = false;
-  Mode = normal;
-  attachInterrupt(digitalPinToInterrupt(3),handle_button_action,CHANGE);
-  cowpi_timer16bit_t *timer1 = (cowpi_timer16bit_t *)(COWPI_IO_BASE + 0x80);
-  timer1->TCCR1A = 0;
-  timer1->TCCR1B = (1 << CS10) | (1 << CS12); // Prescaler of 1024
-  timer1->TCNT1 = 0;
-  timer1->OCR1A = 511; // Compare value for 32,768μs overflow
-  timer1->TIMSK1 |= (1 << OCIE1A); // Enable overflow interrup
+  Mode = normal_operation;
+  attachInterrupt(digitalPinToInterrupt(3), handle_pulse_interrupt,CHANGE);
+  timer1 -> control = 0xC8;//hex 200, sets prescaler to 8
+  timer1 -> compareA = 65536 - 1;
+  volatile uint16_t *timer_interrupt_masks = 1 | 2;
+
 }
 
 void manage_sensor(void) {
-
+  if(requested_ping == true){
+    //set arduino d2 to logic-high
+    digitalWrite(2,HIGH);
+    requested_ping = false;
+    //Next, delay for 10μs
+    delayMicroseconds(10);
+    //Finally, set pin D2 to logic-low
+    digitalWrite(2,LOW);
+  }
 }
 
-ISR(TIMER1_COMPA_vect) {
+// ISR(TIMER1_COMPA_vect) {
   
-}
+// }
